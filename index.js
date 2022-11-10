@@ -19,48 +19,73 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run() {
-    const serviceCollection = client.db('doc-port').collection('services');
-    const reviewCollection = client.db('doc-port').collection('reviewers');
+    try {
+        const serviceCollection = client.db('doc-port').collection('services');
+        const reviewCollection = client.db('doc-port').collection('reviewers');
 
-    app.get('/services', async (req, res) => {
-        const query = {};
-        const cursor = serviceCollection.find(query);
-        const result = await cursor.toArray();
-        res.send(result);
-    })
+        app.get('/services', async (req, res) => {
+            const query = {};
+            const cursor = serviceCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
 
-    app.get('/services/:id', async (req, res) => {
-        const id = req.params.id;
-        const query = { _id: ObjectId(id) };
-        const result = await serviceCollection.findOne(query);
-        res.send(result);
-    })
+        app.get('/services/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await serviceCollection.findOne(query);
+            res.send(result);
+        })
 
-    app.get('/home', async (req, res) => {
-        const query = {};
-        const cursor = serviceCollection.find(query).limit(3);
-        const result = await cursor.toArray();
-        res.send(result);
+        app.get('/home', async (req, res) => {
+            const query = {};
+            const cursor = serviceCollection.find(query).limit(3);
+            const result = await cursor.toArray();
+            res.send(result);
 
-    })
+        })
 
-    //review section
+        //review section
 
-    app.post('/review/:id', async (req, res) => {
-        const data = req.body;
-        const result = await reviewCollection.insertOne(data);
-        res.send(result);
-        console.log(data);
+        app.post('/review/:id', async (req, res) => {
+            const data = req.body;
+            const result = await reviewCollection.insertOne(data);
+            res.send(result);
+            console.log(data);
 
-    })
+        })
 
-    app.get('/review/:id', async (req, res) => {
-        const id = req.params.id;
-        const query = {};
-        const cursor = reviewCollection.find(query);
-        const result = await cursor.toArray();
-        res.send(result);
-    })
+        app.get('/review/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        //user reviews
+
+        app.get('/myreviews', async (req, res) => {
+            // const decoded = req.decoded;
+
+            // if (decoded.email !== req.query.email) {
+            //     res.status(403).send({ message: 'unauthorized access' })
+            // }
+
+            let query = {};
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
+            }
+            const cursor = reviewCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders);
+        });
+    }
+    finally {
+
+    }
 
 
 
